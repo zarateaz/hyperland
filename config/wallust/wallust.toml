@@ -52,6 +52,28 @@ kitty.target = '~/.config/kitty/kitty-themes/01-Wallust.conf'
 quickshell.template = 'qml_color.json'
 quickshell.target = '~/.config/quickshell/qml_color.json'
 
+# Dynamic-Cursor templates
+cursor_manifest.template = 'cursor-manifest.hl'
+cursor_manifest.target = '~/.config/hypr/cursor-source/manifest.hl'
+
+cursor_left_ptr.template = 'cursor-left_ptr.svg'
+cursor_left_ptr.target = '~/.config/hypr/cursor-source/hyprcursors/left_ptr/left_ptr.svg'
+
+cursor_meta_left_ptr.template = 'cursor-meta-left_ptr.hl'
+cursor_meta_left_ptr.target = '~/.config/hypr/cursor-source/hyprcursors/left_ptr/meta.hl'
+
+cursor_pointer.template = 'cursor-pointer.svg'
+cursor_pointer.target = '~/.config/hypr/cursor-source/hyprcursors/pointer/pointer.svg'
+
+cursor_meta_pointer.template = 'cursor-meta-pointer.hl'
+cursor_meta_pointer.target = '~/.config/hypr/cursor-source/hyprcursors/pointer/meta.hl'
+
+cursor_text.template = 'cursor-text.svg'
+cursor_text.target = '~/.config/hypr/cursor-source/hyprcursors/text/text.svg'
+
+cursor_meta_text.template = 'cursor-meta-text.hl'
+cursor_meta_text.target = '~/.config/hypr/cursor-source/hyprcursors/text/meta.hl'
+
 #swaync.template = 'colors-swaync.css'
 #swaync.target = '~/.config/swaync/wallust/colors-wallust.css'
 

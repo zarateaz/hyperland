@@ -1,0 +1,6 @@
+resize_algorithm = bilinear
+hotspot_x = 0.375
+hotspot_y = 0.1875
+define_size = 32, pointer.svg
+define_override = hand2
+define_override = pointing_hand
