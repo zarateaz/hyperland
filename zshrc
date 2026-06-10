@@ -6,11 +6,13 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Set up the prompt
+# Path to Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
-autoload -Uz promptinit
-promptinit
-prompt adam1
+plugins=(git)
+
+source $ZSH/oh-my-zsh.sh
 
 setopt histignorealldups sharehistory
 
@@ -47,62 +49,79 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# Manual configuration
+# ──────────────────────────────────────────────
+# PATH (Arch Linux / Garuda)
+# ──────────────────────────────────────────────
+export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 
-PATH=/root/.local/bin:/snap/bin:/usr/sandbox/:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/share/games:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-
-# Custom Aliases
-
+# ──────────────────────────────────────────────
+# Aliases (Arch usa 'bat' no 'batcat')
+# ──────────────────────────────────────────────
 alias ll='lsd -lh --group-dirs=first'
 alias la='lsd -a --group-dirs=first'
 alias l='lsd --group-dirs=first'
 alias lla='lsd -lha --group-dirs=first'
 alias ls='lsd --group-dirs=first'
-alias cat='/bin/batcat --paging=never'
-alias catn='cat'
-alias catnl='batcat'
+alias cat='bat --paging=never'
+alias catn='/bin/cat'
+alias catnl='bat'
+alias update='sudo pacman -Syu'
 
+# FZF
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Plugins
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-#source /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh-sudo/sudo.plugin.zsh
+# ──────────────────────────────────────────────
+# Plugins (Arch: paths en /usr/share/)
+# ──────────────────────────────────────────────
+# zsh-syntax-highlighting
+if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
 
+# zsh-autosuggestions
+if [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# zsh-sudo (AUR: zsh-sudo)
+if [ -f /usr/share/zsh/plugins/zsh-sudo/sudo.plugin.zsh ]; then
+    source /usr/share/zsh/plugins/zsh-sudo/sudo.plugin.zsh
+fi
+
+# ──────────────────────────────────────────────
 # Functions
+# ──────────────────────────────────────────────
 function mkt(){
-	mkdir {nmap,content,exploits,scripts}
+    mkdir {nmap,content,exploits,scripts}
 }
 
 # Extract nmap information
 function extractPorts(){
-	ports="$(cat $1 | grep -oP '\d{1,5}/open' | awk '{print $1}' FS='/' | xargs | tr ' ' ',')"
-	ip_address="$(cat $1 | grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | sort -u | head -n 1)"
-	echo -e "\n[*] Extracting information...\n" > extractPorts.tmp
-	echo -e "\t[*] IP Address: $ip_address"  >> extractPorts.tmp
-	echo -e "\t[*] Open ports: $ports\n"  >> extractPorts.tmp
-	echo $ports | tr -d '\n' | xclip -sel clip
-	echo -e "[*] Ports copied to clipboard\n"  >> extractPorts.tmp
-	cat extractPorts.tmp; rm extractPorts.tmp
+    ports="$(cat $1 | grep -oP '\d{1,5}/open' | awk '{print $1}' FS='/' | xargs | tr ' ' ',')"
+    ip_address="$(cat $1 | grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | sort -u | head -n 1)"
+    echo -e "\n[*] Extracting information...\n" > extractPorts.tmp
+    echo -e "\t[*] IP Address: $ip_address"  >> extractPorts.tmp
+    echo -e "\t[*] Open ports: $ports\n"  >> extractPorts.tmp
+    echo $ports | tr -d '\n' | xclip -sel clip
+    echo -e "[*] Ports copied to clipboard\n"  >> extractPorts.tmp
+    cat extractPorts.tmp; rm extractPorts.tmp
 }
 
-# Settarget
-
+# settarget
 function settarget(){
-#Función por defecto
-#----------------------------
-#	if [ $# -eq 1 ]; then
-#	echo $1 > ~/.config/bin/target
-#	elif [ $# -gt 2 ]; then
-#	echo "settarget [IP] [NAME] | settarget [IP]"
-#	else
-#	echo $1 $2 > ~/.config/bin/target
-#	fi
-#
-#Funcion mejorada
-#----------------------------
-	/usr/local/bin/settarget "$@"
+    if [ -f /usr/local/bin/settarget ]; then
+        /usr/local/bin/settarget "$@"
+    elif [ $# -eq 1 ]; then
+        echo $1 > ~/.config/bin/target
+    elif [ $# -gt 2 ]; then
+        echo "settarget [IP] [NAME] | settarget [IP]"
+    else
+        echo $1 $2 > ~/.config/bin/target
+    fi
 }
 
 # Set 'man' colors
@@ -120,38 +139,30 @@ function man() {
 
 # fzf improvement
 function fzf-lovely(){
-
-	if [ "$1" = "h" ]; then
-		fzf -m --reverse --preview-window down:20 --preview '[[ $(file --mime {}) =~ binary ]] &&
- 	                echo {} is a binary file ||
-	                 (bat --style=numbers --color=always {} ||
-	                  highlight -O ansi -l {} ||
-	                  coderay {} ||
-	                  rougify {} ||
-	                  cat {}) 2> /dev/null | head -500'
-
-	else
-	        fzf -m --preview '[[ $(file --mime {}) =~ binary ]] &&
-	                         echo {} is a binary file ||
-	                         (bat --style=numbers --color=always {} ||
-	                          highlight -O ansi -l {} ||
-	                         coderay {} ||
-	                          rougify {} ||
-	                          cat {}) 2> /dev/null | head -500'
-	fi
+    if [ "$1" = "h" ]; then
+        fzf -m --reverse --preview-window down:20 --preview '[[ $(file --mime {}) =~ binary ]] &&
+                    echo {} is a binary file ||
+                     (bat --style=numbers --color=always {} ||
+                      highlight -O ansi -l {} ||
+                      cat {}) 2> /dev/null | head -500'
+    else
+        fzf -m --preview '[[ $(file --mime {}) =~ binary ]] &&
+                         echo {} is a binary file ||
+                         (bat --style=numbers --color=always {} ||
+                          highlight -O ansi -l {} ||
+                          cat {}) 2> /dev/null | head -500'
+    fi
 }
 
 function rmk(){
-	scrub -p dod $1
-	shred -zun 10 -v $1
+    shred -zun 10 -v $1
 }
 
 # Finalize Powerlevel10k instant prompt. Should stay at the bottom of ~/.zshrc.
-(( ! ${+functions[p10k-instant-prompt-finalize]} )) || p10k-instant-prompt-finalize 
+(( ! ${+functions[p10k-instant-prompt-finalize]} )) || p10k-instant-prompt-finalize
 
 bindkey "^[[H" beginning-of-line
 bindkey "^[[F" end-of-line
 bindkey "^[[3~" delete-char
 bindkey "^[[1;3C" forward-word
 bindkey "^[[1;3D" backward-word
-source ~/.powerlevel10k/powerlevel10k.zsh-theme

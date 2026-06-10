@@ -25,9 +25,11 @@
 }
 
 window#waybar {
-    background: transparent;
-    border-radius: 0px;
-    color: @foreground;
+  transition-property: background-color;
+  transition-duration: 0.5s;
+  background: transparent;
+  border-radius: 6px;
+  color: @foreground;
 }
 
 window#waybar.hidden {

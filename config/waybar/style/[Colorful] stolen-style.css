@@ -1,5 +1,7 @@
 /* ----------- 💫 https://github.com/JaKooLit 💫 -------- */
 /* ....[Colorful] Stolen ......... */
+@import "wallust/colors-waybar.css";
+
 * {
     font-family: "JetBrainsMono Nerd Font";
     font-weight: bold;
@@ -12,7 +14,7 @@
 window#waybar {
   transition-property: background-color;
   transition-duration: 0.5s;
-  background: rgba(0, 0, 0, 0.8);
+  background: transparent;
   border-radius: 6px;
 }
 
@@ -61,6 +63,10 @@ window#waybar.empty #window {
 #custom-menu,
 #custom-power,
 #custom-power_vertical,
+#custom-target,
+#custom-ports,
+#custom-volumen,
+#custom-battery,
 #custom-speaker,
 #custom-swaync,
 #custom-updater,
@@ -98,7 +104,7 @@ window#waybar.empty #window {
 
 #workspaces button.active {
   color: #00ffff;
-  border: 2px solid #455a64;
+  border: 2px solid @color12;
   border-radius: 16px;
 }
 
@@ -109,7 +115,7 @@ window#waybar.empty #window {
 }
 
 #workspaces button:hover {
-  border: 2px solid #455a64;
+  border: 2px solid @color12;
   border-radius: 16px;
 }
 
@@ -132,7 +138,7 @@ window#waybar.empty #window {
 
 #custom-swaync {
   color: #9fe044;
-  border: 2px solid #455a64;
+  border: 2px solid @color12;
   border-radius: 20px;
   padding-left: 13px;
   padding-right: 12px;
@@ -140,7 +146,7 @@ window#waybar.empty #window {
 
 #custom-keyboard {
   color: #e0af68;
-  border: 2px solid #455a64;
+  border: 2px solid @color12;
   border-radius: 20px;
   padding-left: 14px;
   padding-right: 14px;
@@ -184,33 +190,33 @@ window#waybar.empty #window {
   padding-left: 10px;
   padding-right: 3px;
   color: #ffffed;
-  border-top: 2px solid #455a64;
-  border-bottom: 2px solid #455a64;
-  border-left: 2px solid #455a64;
+  border-top: 2px solid @color12;
+  border-bottom: 2px solid @color12;
+  border-left: 2px solid @color12;
   border-radius: 20px 0px 0px 20px;
 }
 
 #memory {
   color: #ffffed;
   padding-right: 8px;
-  border-bottom: 2px solid #455a64;
-  border-top: 2px solid #455a64;
+  border-bottom: 2px solid @color12;
+  border-top: 2px solid @color12;
   border-radius: 0px;
 }
 
 #temperature {
   color: #ffffed;
-  border-bottom: 2px solid #455a64;
-  border-top: 2px solid #455a64;
+  border-bottom: 2px solid @color12;
+  border-top: 2px solid @color12;
   border-radius: 0px;
 }
 
 #disk {
   padding-right: 16px;
   color: #ffffed;
-  border-top: 2px solid #455a64;
-  border-bottom: 2px solid #455a64;
-  border-right: 2px solid #455a64;
+  border-top: 2px solid @color12;
+  border-bottom: 2px solid @color12;
+  border-right: 2px solid @color12;
   border-radius: 0px 20px 20px 0px;
 }
 
@@ -250,7 +256,7 @@ window#waybar.empty #window {
 
 #custom-updater {
   color: #f7768e;
-  border: 2px solid #455a64;
+  border: 2px solid @color12;
   border-radius: 20px;
   padding-left: 10pt;
   padding-right: 12px;

@@ -52,7 +52,7 @@ fi
 # Update helpers that depend on the path
 ln -sf "$wallpaper_path" "$rofi_link" || true
 mkdir -p "$(dirname "$wallpaper_current")"
-cp -f "$wallpaper_path" "$wallpaper_current" || true
+echo "$wallpaper_path" > "$wallpaper_current" || true
 
 # Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
 # -s is used in this repo to keep things quiet and avoid extra prompts
