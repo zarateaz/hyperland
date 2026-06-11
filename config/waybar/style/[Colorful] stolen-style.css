@@ -14,9 +14,26 @@
 window#waybar {
   transition-property: background-color;
   transition-duration: 0.5s;
-  background: alpha(@background, 0.82); /* Translucent dark theme background */
-  border-bottom: 2px solid @color12; /* Dynamic accent line at the bottom */
-  border-radius: 0px;
+  background: alpha(@background, 0.65); /* Translucent theme background */
+  border: 2px solid @color12; /* Dynamic accent border */
+  border-radius: 16px;
+}
+
+#custom-launcher,
+#clock,
+#custom-clock,
+#custom-ethernet,
+#custom-vpn,
+#workspaces,
+#custom-target,
+#custom-ports,
+#custom-volumen,
+#custom-battery,
+#custom-power {
+  background: rgba(0, 0, 0, 0.35); /* Translucent dark capsule */
+  border-radius: 12px;
+  padding: 2px 12px;
+  margin: 4px 6px;
 }
 
 window#waybar.hidden {
