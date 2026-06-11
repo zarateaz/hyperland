@@ -7,15 +7,16 @@
     font-weight: bold;
 	min-height: 0;  
     /* set font-size to 100% if font scaling is set to 1.00 using nwg-look */
-    font-size: 97%;
+    font-size: 102%;
     font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
 }
 
 window#waybar {
   transition-property: background-color;
   transition-duration: 0.5s;
-  background: transparent;
-  border-radius: 6px;
+  background: alpha(@background, 0.82); /* Translucent dark theme background */
+  border-bottom: 2px solid @color12; /* Dynamic accent line at the bottom */
+  border-radius: 0px;
 }
 
 window#waybar.hidden {
@@ -81,10 +82,10 @@ window#waybar.empty #window {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.sunnyDay {
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-right: 6px;
-  padding-left: 6px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 8px;
+  padding-left: 8px;
 }
 
 #workspaces button {
