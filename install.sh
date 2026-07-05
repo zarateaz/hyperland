@@ -54,6 +54,19 @@ echo -e "$STEP 2/12 Instalando dependencias base..."
 sudo pacman -S --needed --noconfirm git base-devel curl wget xdg-user-dirs
 
 # ─────────────────────────────────────────
+# Auto-clonado si se ejecuta como script individual (sin repositorio local)
+# ─────────────────────────────────────────
+if [[ ! -f "$BASE_DIR/zshrc" ]] || [[ ! -d "$BASE_DIR/config" ]] || [[ ! -d "$BASE_DIR/wallpapers" ]]; then
+    echo -e "$INFO No se encontraron los archivos locales del repositorio."
+    echo -e "$INFO Clonando el repositorio completo de GitHub..."
+    TMP_REPO="$REAL_HOME/.hyperland-setup"
+    rm -rf "$TMP_REPO"
+    git clone https://github.com/zarateaz/hyperland.git "$TMP_REPO"
+    BASE_DIR="$TMP_REPO"
+    echo -e "$OK Repositorio clonado en $BASE_DIR"
+fi
+
+# ─────────────────────────────────────────
 # PASO 3: Instalar AUR helper (yay o paru)
 #   Garuda ya trae paru, Arch normalmente no tiene ninguno
 # ─────────────────────────────────────────
@@ -213,14 +226,14 @@ export RUNZSH=no
 export CHSH=no
 
 if [ ! -d "$REAL_HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    run_safe sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     echo -e "$OK Oh My Zsh instalado"
 else
     echo -e "$OK Oh My Zsh ya existe, omitiendo..."
 fi
 
 if [ ! -d "$REAL_HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+    run_safe git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
         "$REAL_HOME/.oh-my-zsh/custom/themes/powerlevel10k"
     echo -e "$OK Powerlevel10k instalado"
 else
@@ -233,8 +246,8 @@ fi
 echo -e "$STEP 7/12 Configurando Zsh para root..."
 
 if [ ! -d "/root/.oh-my-zsh" ]; then
-    sudo bash -c 'RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
-    sudo git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+    run_safe sudo bash -c 'RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+    run_safe sudo git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
         /root/.oh-my-zsh/custom/themes/powerlevel10k
     echo -e "$OK Oh My Zsh + Powerlevel10k para root instalados"
 else
@@ -268,8 +281,8 @@ echo -e "$STEP 9/12 Copiando configuración Zsh..."
 cp -fv "$BASE_DIR/zshrc"     "$REAL_HOME/.zshrc"
 cp -fv "$BASE_DIR/.p10k.zsh" "$REAL_HOME/.p10k.zsh"
 
-sudo cp -fv "$BASE_DIR/zshrcroot"   /root/.zshrc
-sudo cp -fv "$BASE_DIR/p10k.zshroot" /root/.p10k.zsh
+run_safe sudo cp -fv "$BASE_DIR/zshrcroot"   /root/.zshrc
+run_safe sudo cp -fv "$BASE_DIR/p10k.zshroot" /root/.p10k.zsh
 
 echo -e "$OK Configuración Zsh copiada"
 
@@ -329,7 +342,7 @@ if [ -n "$ZSH_PATH" ]; then
         echo -e "$OK $ZSH_PATH agregado a /etc/shells"
     fi
     sudo chsh -s "$ZSH_PATH" "$REAL_USER"
-    sudo chsh -s "$ZSH_PATH" root
+    run_safe sudo chsh -s "$ZSH_PATH" root
     echo -e "$OK Shell cambiado a zsh ($ZSH_PATH)"
 else
     echo -e "$WARN zsh no encontrado en PATH, omitiendo cambio de shell"
