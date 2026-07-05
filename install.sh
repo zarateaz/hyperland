@@ -293,6 +293,9 @@ echo -e "$STEP 10/12 Copiando dotfiles..."
 
 mkdir -p "$REAL_HOME/.config"
 
+# Limpiar enlaces simbólicos rotos (dangling symlinks) para evitar errores con cp
+find "$REAL_HOME/.config" -type l ! -exec test -e {} \; -delete 2>/dev/null || true
+
 for dir in "$BASE_DIR"/config/*/; do
     dirname=$(basename "$dir")
     echo -e "$INFO  → .config/$dirname"
