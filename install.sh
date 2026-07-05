@@ -165,6 +165,9 @@ packages=(
 
     # Extras
     cava
+    wallust
+    pyprland
+    waypaper
 )
 
 failed_pkgs=()
@@ -184,12 +187,9 @@ echo -e "$STEP 5/12 Instalando paquetes AUR..."
 
 aur_packages=(
     "pokemon-colorscripts-git"
-    "pyprland"
-    "wallust"
     "quickshell-git"
     "mpv-mpris"
     "zsh-sudo"
-    "waypaper"
 )
 
 # Agregar los que fallaron en repos oficiales
