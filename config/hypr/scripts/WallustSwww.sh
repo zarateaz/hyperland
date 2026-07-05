@@ -58,7 +58,7 @@ echo "$wallpaper_path" > "$wallpaper_current" || true
 # -s is used in this repo to keep things quiet and avoid extra prompts
 wallust run -s "$wallpaper_path" || true
 
-# Compile and apply the dynamic cursor theme with the new colors
+# Compile and apply the dynamic cursor theme with the new colors (run in background to avoid lag on low-end devices)
 if [ -f "$HOME/.config/hypr/scripts/CompileCursor.sh" ]; then
-    bash "$HOME/.config/hypr/scripts/CompileCursor.sh" || true
+    bash "$HOME/.config/hypr/scripts/CompileCursor.sh" &
 fi
