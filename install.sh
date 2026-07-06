@@ -45,7 +45,11 @@ echo ""
 # PASO 1: Actualizar sistema
 # ─────────────────────────────────────────
 echo -e "$STEP 1/12 Actualizando repositorios del sistema..."
-sudo pacman -Syu --noconfirm
+# Intentar actualización completa. Si falla (por ejemplo por espejos lentos), intentar solo base de datos.
+if ! sudo pacman -Syu --noconfirm; then
+    echo -e "$WARN Falló la actualización completa (pacman -Syu). Intentando actualizar base de datos..."
+    sudo pacman -Sy --noconfirm || echo -e "$WARN No se pudieron sincronizar los repositorios. Continuando con la base de datos local..."
+fi
 
 # ─────────────────────────────────────────
 # PASO 2: Dependencias base (siempre necesarias)
