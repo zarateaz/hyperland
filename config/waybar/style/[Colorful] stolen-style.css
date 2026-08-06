@@ -20,12 +20,21 @@ window#waybar {
 
 .modules-center {
   background: alpha(@background, 0.65); /* Translucent theme background */
-  border: 2px solid @color12; /* Dynamic accent border */
+  border-bottom: 2px solid @color12; /* Dynamic accent border */
   border-radius: 16px;
   padding: 2px 10px;
+  box-shadow: 0 4px 10px -2px alpha(@color12, 0.5);
 }
 
-#custom-launcher,
+#custom-launcher {
+  color: @foreground;
+  font-size: 115%;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
 #clock,
 #custom-clock,
 #custom-ethernet,
@@ -36,10 +45,11 @@ window#waybar {
 #custom-battery,
 #custom-power {
   background: alpha(@background, 0.65); /* Translucent theme background */
-  border: 2px solid @color12; /* Dynamic accent border */
+  border-bottom: 2px solid @color12; /* Dynamic bottom accent border */
   border-radius: 16px;
   padding: 2px 12px;
   margin: 4px 4px;
+  box-shadow: 0 4px 10px -2px alpha(@color12, 0.5); /* Glow shadow primarily at the bottom */
 }
 
 window#waybar.hidden {
@@ -119,7 +129,7 @@ window#waybar.empty #window {
 }
 
 #workspaces button.persistent {
-  color: #faba4a;
+  color: @color12;
 }
 
 #workspaces button.empty {
@@ -130,17 +140,20 @@ window#waybar.empty #window {
   color: #00ffff;
   border: 2px solid @color12;
   border-radius: 16px;
+  box-shadow: 0 0 8px 1px alpha(@color12, 0.5);
 }
 
 #workspaces button.urgent {
   color: #f7768e;
   border: 2px solid #f7768e;
   border-radius: 16px;
+  box-shadow: 0 0 8px 1px rgba(247, 118, 142, 0.5);
 }
 
 #workspaces button:hover {
   border: 2px solid @color12;
   border-radius: 16px;
+  box-shadow: 0 0 8px 1px alpha(@color12, 0.3);
 }
 
 #idle_inhibitor {
@@ -166,6 +179,7 @@ window#waybar.empty #window {
   border-radius: 20px;
   padding-left: 13px;
   padding-right: 12px;
+  box-shadow: 0 0 8px 1px alpha(@color12, 0.5);
 }
 
 #custom-keyboard {
@@ -174,6 +188,7 @@ window#waybar.empty #window {
   border-radius: 20px;
   padding-left: 14px;
   padding-right: 14px;
+  box-shadow: 0 0 8px 1px alpha(@color12, 0.5);
 }
 
 #custom-cycle_wall {
@@ -284,7 +299,7 @@ window#waybar.empty #window {
   border-radius: 20px;
   padding-left: 10pt;
   padding-right: 12px;
-
+  box-shadow: 0 0 8px 1px alpha(@color12, 0.5);
 }
 
 #custom-light_dark {
@@ -297,11 +312,11 @@ window#waybar.empty #window {
 }
 
 #custom-speaker {
-  color: #faba4a;
+  color: @color12;
 }
 
 #pulseaudio {
-  color: #faba4a;
+  color: @color12;
 
 }
 
