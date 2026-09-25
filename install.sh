@@ -236,8 +236,11 @@ export PATH="$REAL_HOME/.cargo/bin:$PATH"
 # Instala un binario de cargo en /usr/local/bin para que Hyprland lo encuentre
 cargo_to_system() {
     for bin in "$@"; do
-        [ -x "$REAL_HOME/.cargo/bin/$bin" ] && sudo install -m 755 "$REAL_HOME/.cargo/bin/$bin" /usr/local/bin/
+        if [ -x "$REAL_HOME/.cargo/bin/$bin" ]; then
+            sudo install -m 755 "$REAL_HOME/.cargo/bin/$bin" /usr/local/bin/
+        fi
     done
+    return 0
 }
 
 # pipx global (binarios en /usr/local/bin)
