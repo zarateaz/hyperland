@@ -50,28 +50,39 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
 # ──────────────────────────────────────────────
-# PATH (Arch Linux / Garuda)
+# PATH (Kali Linux)
 # ──────────────────────────────────────────────
-export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 
 # ──────────────────────────────────────────────
-# Aliases (Arch usa 'bat' no 'batcat')
+# Aliases (en Kali bat se llama 'batcat'; el instalador crea el enlace 'bat')
 # ──────────────────────────────────────────────
 alias ll='lsd -lh --group-dirs=first'
 alias la='lsd -a --group-dirs=first'
 alias l='lsd --group-dirs=first'
 alias lla='lsd -lha --group-dirs=first'
 alias ls='lsd --group-dirs=first'
-alias cat='bat --paging=never'
+if command -v bat &>/dev/null; then
+    alias cat='bat --paging=never'
+    alias catnl='bat'
+elif command -v batcat &>/dev/null; then
+    alias bat='batcat'
+    alias cat='batcat --paging=never'
+    alias catnl='batcat'
+fi
 alias catn='/bin/cat'
-alias catnl='bat'
-alias update='sudo pacman -Syu'
+alias update='sudo apt update && sudo apt full-upgrade -y'
 
 # FZF
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+    [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
+fi
 
 # ──────────────────────────────────────────────
-# Plugins (Arch: paths en /usr/share/)
+# Plugins (Kali: paths en /usr/share/)
 # ──────────────────────────────────────────────
 # zsh-syntax-highlighting
 if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
@@ -87,9 +98,9 @@ elif [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
     source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
-# zsh-sudo (AUR: zsh-sudo)
-if [ -f /usr/share/zsh/plugins/zsh-sudo/sudo.plugin.zsh ]; then
-    source /usr/share/zsh/plugins/zsh-sudo/sudo.plugin.zsh
+# zsh-sudo (descargado por install.sh)
+if [ -f /usr/share/zsh-sudo/sudo.plugin.zsh ]; then
+    source /usr/share/zsh-sudo/sudo.plugin.zsh
 fi
 
 # ──────────────────────────────────────────────

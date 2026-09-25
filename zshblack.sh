@@ -6,7 +6,7 @@ set -e
 
 green="\e[32m"; red="\e[31m"; blue="\e[34m"; end="\e[0m"
 
-echo -e "${blue}[*] Iniciando instalación ZSH en Arch Linux...${end}"
+echo -e "${blue}[*] Iniciando instalación ZSH en Kali Linux...${end}"
 
 # -------------------------------------------------------
 # 1. Validación de carpeta actual
@@ -27,8 +27,9 @@ echo -e "${green}[+] Archivos detectados correctamente${end}"
 # -------------------------------------------------------
 echo -e "${blue}[*] Instalando dependencias...${end}"
 
-sudo pacman -Sy --noconfirm \
-    zsh git curl wget
+sudo apt-get update
+sudo apt-get install -y \
+    zsh git curl wget zsh-syntax-highlighting zsh-autosuggestions
 
 echo -e "${green}[+] Dependencias instaladas${end}"
 

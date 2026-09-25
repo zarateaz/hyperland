@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════════════════════════
-#  Hyprland Dotfiles - Instalador para Arch Linux / Garuda Linux
-#  https://github.com/espinalclark/Hyprland-Kali
+#  Hyprland Dotfiles - Instalador para Kali Linux (kali-rolling)
+#  https://github.com/zarateaz/hyperland-kalilinux
 # ══════════════════════════════════════════════════════════════════════
 
 set -e          # salir si hay error crítico
@@ -21,6 +21,29 @@ run_safe() {
     "$@" || echo -e "$WARN  Falló (no crítico): $*"
 }
 
+# apt sin preguntas (evita diálogos de debconf / needrestart)
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+APT="sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+
+# ¿El paquete existe en los repos configurados?
+pkg_available() {
+    LC_ALL=C apt-cache policy "$1" 2>/dev/null | grep -q 'Candidate: [^(]'
+}
+
+# Instala el primer paquete disponible de una lista "a|b|c"
+apt_install_any() {
+    local alt
+    IFS='|' read -ra alts <<< "$1"
+    for alt in "${alts[@]}"; do
+        if pkg_available "$alt" && $APT install "$alt" >/dev/null 2>&1; then
+            echo -e "$OK $alt"
+            return 0
+        fi
+    done
+    return 1
+}
+
 # ─────────────────────────────────────────
 # NO ejecutar como root
 # ─────────────────────────────────────────
@@ -31,11 +54,25 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 # ─────────────────────────────────────────
+# Verificar que estamos en Kali (o derivado de Debian)
+# ─────────────────────────────────────────
+if ! command -v apt-get &>/dev/null; then
+    echo -e "$ERROR Este instalador es para Kali Linux (apt). No se encontró apt-get."
+    exit 1
+fi
+. /etc/os-release
+if [ "${ID:-}" != "kali" ]; then
+    echo -e "$WARN Distro detectada: ${PRETTY_NAME:-desconocida}. Este script está pensado para Kali Linux."
+    echo -e "$WARN Se continuará, pero algunos paquetes podrían no existir."
+fi
+
+# ─────────────────────────────────────────
 # Variables
 # ─────────────────────────────────────────
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REAL_USER="$USER"
 REAL_HOME="$HOME"
+BUILD_DIR="$REAL_HOME/.hypr-kali-build"
 
 echo -e "$INFO Usuario detectado: $REAL_USER"
 echo -e "$INFO Directorio del script: $BASE_DIR"
@@ -45,17 +82,18 @@ echo ""
 # PASO 1: Actualizar sistema
 # ─────────────────────────────────────────
 echo -e "$STEP 1/12 Actualizando repositorios del sistema..."
-# Intentar actualización completa. Si falla (por ejemplo por espejos lentos), intentar solo base de datos.
-if ! sudo pacman -Syu --noconfirm; then
-    echo -e "$WARN Falló la actualización completa (pacman -Syu). Intentando actualizar base de datos..."
-    sudo pacman -Sy --noconfirm || echo -e "$WARN No se pudieron sincronizar los repositorios. Continuando con la base de datos local..."
+sudo apt-get update
+if ! $APT full-upgrade; then
+    echo -e "$WARN Falló la actualización completa (apt full-upgrade). Continuando con los paquetes actuales..."
 fi
 
 # ─────────────────────────────────────────
 # PASO 2: Dependencias base (siempre necesarias)
 # ─────────────────────────────────────────
 echo -e "$STEP 2/12 Instalando dependencias base..."
-sudo pacman -S --needed --noconfirm git base-devel curl wget xdg-user-dirs
+$APT install git build-essential curl wget unzip xz-utils xdg-user-dirs \
+    ca-certificates pkg-config cargo pipx python3 python3-gi python3-pil \
+    fontconfig jq bc libnotify-bin
 
 # ─────────────────────────────────────────
 # Auto-clonado si se ejecuta como script individual (sin repositorio local)
@@ -65,51 +103,28 @@ if [[ ! -f "$BASE_DIR/zshrc" ]] || [[ ! -d "$BASE_DIR/config" ]] || [[ ! -d "$BA
     echo -e "$INFO Clonando el repositorio completo de GitHub..."
     TMP_REPO="$REAL_HOME/.hyperland-setup"
     rm -rf "$TMP_REPO"
-    git clone https://github.com/zarateaz/hyperland.git "$TMP_REPO"
+    git clone https://github.com/zarateaz/hyperland-kalilinux.git "$TMP_REPO"
     BASE_DIR="$TMP_REPO"
     echo -e "$OK Repositorio clonado en $BASE_DIR"
 fi
 
 # ─────────────────────────────────────────
-# PASO 3: Instalar AUR helper (yay o paru)
-#   Garuda ya trae paru, Arch normalmente no tiene ninguno
+# PASO 3: Paquetes de los repos de Kali
+#   "a|b" = se instala el primero que exista (nombres cambian entre versiones)
 # ─────────────────────────────────────────
-echo -e "$STEP 3/12 Verificando AUR helper..."
+echo -e "$STEP 3/12 Instalando paquetes de los repositorios de Kali..."
 
-AUR_HELPER=""
-if command -v paru &>/dev/null; then
-    AUR_HELPER="paru"
-    echo -e "$OK paru detectado (modo Garuda)"
-elif command -v yay &>/dev/null; then
-    AUR_HELPER="yay"
-    echo -e "$OK yay ya está instalado"
-else
-    echo -e "$INFO Instalando yay (AUR helper)..."
-    YAY_TMP="$REAL_HOME/.yay-build"
-    rm -rf "$YAY_TMP"
-    mkdir -p "$YAY_TMP"
-    git clone https://aur.archlinux.org/yay.git "$YAY_TMP/yay"
-    pushd "$YAY_TMP/yay" > /dev/null
-    makepkg -si --noconfirm
-    popd > /dev/null
-    rm -rf "$YAY_TMP"
-    AUR_HELPER="yay"
-    echo -e "$OK yay instalado correctamente"
-fi
-
-# ─────────────────────────────────────────
-# PASO 4: Paquetes oficiales de Arch/Garuda
-#   Separados en grupos para mejor diagnóstico
-# ─────────────────────────────────────────
-echo -e "$STEP 4/12 Instalando paquetes oficiales..."
+# Críticos: sin estos no hay escritorio
+critical=(hyprland xdg-desktop-portal-hyprland waybar kitty)
 
 packages=(
     # Sistema base Hyprland
     hyprland
     hypridle
     hyprlock
-    hyprpolkitagent
+    "hyprpolkitagent|policykit-1-gnome|polkit-kde-agent-1"
     xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk
 
     # Wayland utilities
     grim
@@ -130,10 +145,10 @@ packages=(
 
     # Bar y notificaciones
     waybar
-    swaync
+    sway-notification-center
 
     # Apariencia
-    kvantum
+    qt-style-kvantum
     nwg-look
     qt5ct
     qt6ct
@@ -147,6 +162,7 @@ packages=(
     lsd
     imagemagick
     mpv
+    mpv-mpris
     yt-dlp
 
     # Gestión de archivos
@@ -158,14 +174,15 @@ packages=(
     xarchiver
     mousepad
 
-    # Red y display
-    network-manager-applet
+    # Red, bluetooth y display
+    network-manager-gnome
+    blueman
     nwg-displays
     brightnessctl
     nvtop
 
-    # Rofi y menús
-    rofi-wayland
+    # Rofi y menús (rofi >= 2.0 ya soporta Wayland)
+    "rofi-wayland|rofi"
     wlogout
     yad
     qalculate-gtk
@@ -175,51 +192,145 @@ packages=(
     zsh-syntax-highlighting
     zsh-autosuggestions
 
-    # Fuentes
-    ttf-jetbrains-mono-nerd
-    noto-fonts
-    noto-fonts-emoji
+    # Fuentes (JetBrains Mono Nerd se descarga en el paso 4)
+    fonts-noto
+    fonts-noto-color-emoji
+    fonts-jetbrains-mono
+    fonts-font-awesome
 
-    # Extras
+    # Extras (si no existen en apt, se compilan/instalan en el paso 4)
     cava
     wallust
     pyprland
     waypaper
+    quickshell
 )
 
 failed_pkgs=()
 for pkg in "${packages[@]}"; do
-    if sudo pacman -S --needed --noconfirm "$pkg" 2>/dev/null; then
-        echo -e "$OK $pkg"
-    else
-        echo -e "$WARN $pkg → no encontrado en repos oficiales, se intentará con AUR"
+    if ! apt_install_any "$pkg"; then
+        echo -e "$WARN $pkg → no disponible en los repos de Kali"
         failed_pkgs+=("$pkg")
     fi
 done
 
-# ─────────────────────────────────────────
-# PASO 5: Paquetes exclusivos de AUR
-# ─────────────────────────────────────────
-echo -e "$STEP 5/12 Instalando paquetes AUR..."
-
-aur_packages=(
-    "pokemon-colorscripts-git"
-    "quickshell-git"
-    "mpv-mpris"
-    "zsh-sudo"
-)
-
-# Agregar los que fallaron en repos oficiales
-aur_packages+=("${failed_pkgs[@]}")
-
-for pkg in "${aur_packages[@]}"; do
-    echo -e "$INFO  → $pkg (AUR)"
-    if $AUR_HELPER -S --needed --noconfirm "$pkg" 2>/dev/null; then
-        echo -e "$OK $pkg"
-    else
-        echo -e "$WARN $pkg falló en AUR (se continúa de todos modos)"
-    fi
+missing_critical=()
+for pkg in "${critical[@]}"; do
+    dpkg -s "$pkg" &>/dev/null || missing_critical+=("$pkg")
 done
+if [ "${#missing_critical[@]}" -gt 0 ]; then
+    echo -e "$ERROR No se pudieron instalar paquetes críticos: ${missing_critical[*]}"
+    echo -e "$INFO  Verifica /etc/apt/sources.list (debe tener: deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware)"
+    exit 1
+fi
+
+# ─────────────────────────────────────────
+# PASO 4: Lo que no está en apt (equivalente a los paquetes AUR)
+# ─────────────────────────────────────────
+echo -e "$STEP 4/12 Instalando herramientas que no están en los repos de Kali..."
+
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+export PATH="$REAL_HOME/.cargo/bin:$PATH"
+
+# Instala un binario de cargo en /usr/local/bin para que Hyprland lo encuentre
+cargo_to_system() {
+    for bin in "$@"; do
+        [ -x "$REAL_HOME/.cargo/bin/$bin" ] && sudo install -m 755 "$REAL_HOME/.cargo/bin/$bin" /usr/local/bin/
+    done
+}
+
+# pipx global (binarios en /usr/local/bin)
+pipx_global() {
+    sudo PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install "$@"
+}
+
+# bat en Debian/Kali se llama 'batcat'
+if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
+    sudo ln -sf "$(command -v batcat)" /usr/local/bin/bat
+    echo -e "$OK Enlace bat → batcat creado"
+fi
+
+# swww (fondos de pantalla)
+if ! command -v swww &>/dev/null; then
+    echo -e "$INFO  → swww (compilando con cargo)"
+    run_safe $APT install liblz4-dev libxkbcommon-dev libwayland-dev wayland-protocols
+    if cargo install --locked --git https://github.com/LGFae/swww --tag v0.9.5 swww swww-daemon; then
+        cargo_to_system swww swww-daemon
+        echo -e "$OK swww"
+    else
+        echo -e "$WARN swww falló (se continúa de todos modos)"
+    fi
+fi
+
+# wallust (colores a partir del wallpaper)
+if ! command -v wallust &>/dev/null; then
+    echo -e "$INFO  → wallust (compilando con cargo)"
+    if cargo install --locked wallust; then
+        cargo_to_system wallust
+        echo -e "$OK wallust"
+    else
+        echo -e "$WARN wallust falló (se continúa de todos modos)"
+    fi
+fi
+
+# pyprland
+if ! command -v pypr &>/dev/null; then
+    echo -e "$INFO  → pyprland (pipx)"
+    run_safe pipx_global pyprland
+fi
+
+# waypaper (necesita GTK del sistema → --system-site-packages)
+if ! command -v waypaper &>/dev/null; then
+    echo -e "$INFO  → waypaper (pipx)"
+    run_safe $APT install gir1.2-gtk-3.0
+    run_safe pipx_global --system-site-packages waypaper
+fi
+
+# pokemon-colorscripts
+if ! command -v pokemon-colorscripts &>/dev/null; then
+    echo -e "$INFO  → pokemon-colorscripts"
+    if git clone --depth=1 https://gitlab.com/phoneybadger/pokemon-colorscripts.git "$BUILD_DIR/pokemon-colorscripts"; then
+        (cd "$BUILD_DIR/pokemon-colorscripts" && sudo ./install.sh) && echo -e "$OK pokemon-colorscripts" \
+            || echo -e "$WARN pokemon-colorscripts falló"
+    fi
+fi
+
+# zsh-sudo (en Arch venía del AUR)
+if [ ! -f /usr/share/zsh-sudo/sudo.plugin.zsh ]; then
+    echo -e "$INFO  → zsh-sudo"
+    sudo mkdir -p /usr/share/zsh-sudo
+    run_safe sudo curl -fsSL -o /usr/share/zsh-sudo/sudo.plugin.zsh \
+        https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/plugins/sudo/sudo.plugin.zsh
+fi
+
+# JetBrains Mono Nerd Font
+if ! fc-list | grep -qi "JetBrainsMono Nerd"; then
+    echo -e "$INFO  → JetBrains Mono Nerd Font"
+    if wget -q -O "$BUILD_DIR/JetBrainsMono.tar.xz" \
+        https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz; then
+        sudo mkdir -p /usr/local/share/fonts/JetBrainsMonoNerd
+        sudo tar -xJf "$BUILD_DIR/JetBrainsMono.tar.xz" -C /usr/local/share/fonts/JetBrainsMonoNerd
+        sudo fc-cache -f >/dev/null
+        echo -e "$OK JetBrains Mono Nerd Font"
+    else
+        echo -e "$WARN No se pudo descargar JetBrains Mono Nerd Font"
+    fi
+fi
+
+# quickshell no está empaquetado en Kali: es opcional (overview de escritorio)
+if ! command -v qs &>/dev/null; then
+    echo -e "$WARN quickshell no está disponible en Kali; el overview de escritorio (qs) quedará desactivado"
+fi
+
+rm -rf "$BUILD_DIR"
+
+# ─────────────────────────────────────────
+# PASO 5: Servicios de audio (PipeWire) para el usuario
+# ─────────────────────────────────────────
+echo -e "$STEP 5/12 Activando PipeWire para el usuario..."
+run_safe systemctl --user enable pipewire pipewire-pulse wireplumber
+
 
 # ─────────────────────────────────────────
 # PASO 6: Oh My Zsh + Powerlevel10k (usuario normal)
@@ -449,6 +560,10 @@ echo -e "\e[32m║                                                          ║\
 echo -e "\e[32m║  Próximos pasos:                                         ║\e[0m"
 echo -e "\e[32m║  → Cierra sesión y vuelve a entrar (o reinicia)          ║\e[0m"
 echo -e "\e[32m║  → Selecciona Hyprland en tu gestor de login             ║\e[0m"
-echo -e "\e[32m║  → Si usas Garuda: el tema ya está listo                 ║\e[0m"
 echo -e "\e[32m╚══════════════════════════════════════════════════════════╝\e[0m"
 echo ""
+
+if [ "${#failed_pkgs[@]}" -gt 0 ]; then
+    echo -e "$WARN Paquetes que no estaban en apt (revisa que sus alternativas se hayan instalado):"
+    printf '       - %s\n' "${failed_pkgs[@]}"
+fi

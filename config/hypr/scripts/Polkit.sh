@@ -6,6 +6,8 @@
 polkit=(
   "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
   "/usr/libexec/hyprpolkitagent"
+  "/usr/lib/x86_64-linux-gnu/libexec/hyprpolkitagent"
+  "/usr/lib/aarch64-linux-gnu/libexec/hyprpolkitagent"
   "/usr/lib/hyprpolkitagent"
   "/usr/lib/hyprpolkitagent/hyprpolkitagent"
   "/usr/lib/polkit-kde-authentication-agent-1"

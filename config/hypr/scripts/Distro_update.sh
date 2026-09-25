@@ -12,7 +12,11 @@ if ! command -v kitty &> /dev/null; then
 fi
 
 # Detect distribution and update accordingly
-if command -v paru &> /dev/null || command -v yay &> /dev/null; then
+if command -v apt &> /dev/null; then
+  # Kali / Debian-based
+  kitty -T update sh -c 'sudo apt update && sudo apt full-upgrade -y; echo; read -r -p "Enter para cerrar..." _'
+  notify-send -i "$iDIR/ja.png" -u low 'Kali Linux' 'has been updated.'
+elif command -v paru &> /dev/null || command -v yay &> /dev/null; then
   # Arch-based
   if command -v paru &> /dev/null; then
     kitty -T update paru -Syu
@@ -25,10 +29,6 @@ elif command -v dnf &> /dev/null; then
   # Fedora-based
   kitty -T update sudo dnf update --refresh -y
   notify-send -i "$iDIR/ja.png" -u low 'Fedora system' 'has been updated.'
-elif command -v apt &> /dev/null; then
-  # Debian-based (Debian, Ubuntu, etc.)
-  kitty -T update sudo apt update && sudo apt upgrade -y
-  notify-send -i "$iDIR/ja.png" -u low 'Debian/Ubuntu system' 'has been updated.'
 elif command -v zypper &> /dev/null; then
   # openSUSE-based
   kitty -T update sudo zypper dup -y
