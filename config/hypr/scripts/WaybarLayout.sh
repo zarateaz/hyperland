@@ -18,13 +18,18 @@ apply_config() {
 }
 
 main() {
+    if [ ! -d "$waybar_layouts" ]; then
+        notify-send -u low "Waybar Layouts" "No alternate layouts found in $waybar_layouts" 2>/dev/null || true
+        exit 0
+    fi
+
     # Resolve current symlink target and basename
     current_target=$(readlink -f "$waybar_config")
     current_name=$(basename "$current_target")
 
     # Build sorted list of available layouts
     mapfile -t options < <(
-        find -L "$waybar_layouts" -maxdepth 1 -type f -printf '%f\n' | sort
+        find -L "$waybar_layouts" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort
     )
 
     # Mark and locate the active layout
@@ -50,7 +55,7 @@ main() {
     [[ -z "$choice" ]] && { echo "No option selected. Exiting."; exit 0; }
 
     # Strip marker before applying
-    choice=${choice# $MARKER}
+    choice="${choice#"$MARKER "}"
 
     case "$choice" in
         "no panel")

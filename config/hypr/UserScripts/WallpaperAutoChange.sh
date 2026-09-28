@@ -18,18 +18,17 @@ export SWWW_TRANSITION_TYPE=simple
 INTERVAL=1800
 
 while true; do
-	find -L "$1" \
+	find -L "$1" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.gif" \) \
 		| while read -r img; do
 			echo "$((RANDOM % 1000)):$img"
 		done \
 		| sort -n | cut -d':' -f2- \
 		| while read -r img; do
-			swww img -o $focused_monitor "$img"
+			swww img -o "$focused_monitor" "$img"
 			# Regenerate colors from the exact image path to avoid cache races
-			$HOME/.config/hypr/scripts/WallustSwww.sh "$img"
+			"$HOME/.config/hypr/scripts/WallustSwww.sh" "$img"
 			# Refresh UI components that depend on wallust output
-			$wallust_refresh
-			sleep $INTERVAL
-			
+			"$wallust_refresh"
+			sleep "$INTERVAL"
 		done
 done

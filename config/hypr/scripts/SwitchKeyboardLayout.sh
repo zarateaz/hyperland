@@ -10,9 +10,8 @@ notif_icon="$HOME/.config/swaync/images/ja.png"
 ignore_patterns=(
   "--(avrcp)" 
   "Bluetooth Speaker" 
-  "Other Device 
-  Name"
-  )
+  "Other Device Name"
+)
 
 
 # Create layout file with default layout if it does not exist

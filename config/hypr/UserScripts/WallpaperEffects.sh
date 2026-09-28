@@ -1,4 +1,4 @@
-#!/bin/bas
+#!/bin/bash
 # Wallpaper Effects using ImageMagick (SUPER SHIFT W)
 
 # Variables

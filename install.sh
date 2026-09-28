@@ -93,7 +93,7 @@ fi
 echo -e "$STEP 2/12 Instalando dependencias base..."
 $APT install git build-essential curl wget unzip xz-utils xdg-user-dirs \
     ca-certificates pkg-config cargo pipx python3 python3-gi python3-pil \
-    fontconfig jq bc libnotify-bin
+    fontconfig jq bc libnotify-bin socat
 
 # ─────────────────────────────────────────
 # Auto-clonado si se ejecuta como script individual (sin repositorio local)
@@ -122,7 +122,9 @@ packages=(
     hyprland
     hypridle
     hyprlock
-    "hyprpolkitagent|policykit-1-gnome|polkit-kde-agent-1"
+    "hyprpolkitagent|polkit-gnome|policykit-1-gnome|polkit-kde-agent-1"
+    hyprland-qt-support
+    hyprland-guiutils
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
 
@@ -254,15 +256,21 @@ if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
     echo -e "$OK Enlace bat → batcat creado"
 fi
 
-# swww (fondos de pantalla)
+# swww (fondos de pantalla - versión actualizada v0.11.2)
 if ! command -v swww &>/dev/null; then
-    echo -e "$INFO  → swww (compilando con cargo)"
-    run_safe $APT install liblz4-dev libxkbcommon-dev libwayland-dev wayland-protocols
-    if cargo install --locked --git https://github.com/LGFae/swww --tag v0.9.5 swww swww-daemon; then
-        cargo_to_system swww swww-daemon
-        echo -e "$OK swww"
+    echo -e "$INFO  → swww (compilando versión v0.11.2 con cargo)"
+    run_safe $APT install liblz4-dev libxkbcommon-dev libwayland-dev wayland-protocols git
+    if git clone --depth=1 --branch v0.11.2 https://github.com/LGFae/swww.git "$BUILD_DIR/swww" 2>/dev/null || \
+       git clone --depth=1 https://github.com/LGFae/swww.git "$BUILD_DIR/swww"; then
+        if (cd "$BUILD_DIR/swww" && cargo build --release); then
+            sudo install -m 755 "$BUILD_DIR/swww/target/release/swww" /usr/local/bin/
+            sudo install -m 755 "$BUILD_DIR/swww/target/release/swww-daemon" /usr/local/bin/
+            echo -e "$OK swww y swww-daemon instalados"
+        else
+            echo -e "$WARN Falló la compilación de swww"
+        fi
     else
-        echo -e "$WARN swww falló (se continúa de todos modos)"
+        echo -e "$WARN No se pudo clonar el repositorio de swww"
     fi
 fi
 
@@ -318,6 +326,20 @@ if ! fc-list | grep -qi "JetBrainsMono Nerd"; then
         echo -e "$OK JetBrains Mono Nerd Font"
     else
         echo -e "$WARN No se pudo descargar JetBrains Mono Nerd Font"
+    fi
+fi
+
+# Victor Mono Nerd Font (necesario para hyprlock)
+if ! fc-list | grep -qi "VictorMono Nerd"; then
+    echo -e "$INFO  → Victor Mono Nerd Font (para hyprlock)"
+    if wget -q -O "$BUILD_DIR/VictorMono.tar.xz" \
+        https://github.com/ryanoasis/nerd-fonts/releases/latest/download/VictorMono.tar.xz; then
+        sudo mkdir -p /usr/local/share/fonts/VictorMonoNerd
+        sudo tar -xJf "$BUILD_DIR/VictorMono.tar.xz" -C /usr/local/share/fonts/VictorMonoNerd
+        sudo fc-cache -f >/dev/null
+        echo -e "$OK Victor Mono Nerd Font"
+    else
+        echo -e "$WARN No se pudo descargar Victor Mono Nerd Font"
     fi
 fi
 
@@ -419,6 +441,7 @@ for dir in "$BASE_DIR"/config/*/; do
     echo -e "$INFO  → .config/$dirname"
     cp -r "$dir" "$REAL_HOME/.config/"
 done
+rm -f "$REAL_HOME/.config/hypr/.initial_startup_done"
 
 # Wallpapers
 PICS_DIR=$(xdg-user-dir PICTURES 2>/dev/null || echo "$REAL_HOME/Pictures")
@@ -442,6 +465,13 @@ for f in zsh_historyroot; do
         echo -e "$OK $f copiado a ~/.$f"
     fi
 done
+
+# Configurar rutas en waypaper/config.ini para el usuario actual
+if [ -f "$REAL_HOME/.config/waypaper/config.ini" ]; then
+    sed -i "s|^folder = .*|folder = $PICS_DIR/wallpapers|" "$REAL_HOME/.config/waypaper/config.ini"
+    sed -i "s|^stylesheet = .*|stylesheet = $REAL_HOME/.config/waypaper/style.css|" "$REAL_HOME/.config/waypaper/config.ini"
+    echo -e "$OK Rutas actualizadas en waypaper/config.ini"
+fi
 
 # ─────────────────────────────────────────
 # Detección y configuración automática de hardware (Monitor, Lockscreen y Touchpad)
@@ -516,7 +546,7 @@ else
 fi
 
 # ─────────────────────────────────────────
-# PASO 11: Permisos a scripts de Hypr
+# PASO 11: Permisos a scripts de Hypr y utilidades
 # ─────────────────────────────────────────
 echo -e "$STEP 11/12 Asignando permisos a scripts..."
 
@@ -527,6 +557,23 @@ do
     if [ -d "$dir" ]; then
         find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
         echo -e "$OK Permisos asignados: $dir"
+    fi
+done
+
+if [ -d "$REAL_HOME/.config/bin" ]; then
+    find "$REAL_HOME/.config/bin" -type f \( -name "*.sh" -o -name "*.py" -o -name "settarget" -o -name "setports" \) -exec chmod +x {} \;
+    echo -e "$OK Permisos asignados: $REAL_HOME/.config/bin"
+fi
+
+# Enlaces a utilidades globales (settarget, setports, vpnhtb) en /usr/local/bin
+for bin_util in settarget setports vpnhtb.sh; do
+    if [ -f "$REAL_HOME/.config/bin/$bin_util" ]; then
+        run_safe sudo ln -sf "$REAL_HOME/.config/bin/$bin_util" "/usr/local/bin/$bin_util"
+        echo -e "$OK Enlace creado: /usr/local/bin/$bin_util -> $REAL_HOME/.config/bin/$bin_util"
+        if [ "$bin_util" = "vpnhtb.sh" ]; then
+            run_safe sudo ln -sf "$REAL_HOME/.config/bin/$bin_util" "/usr/local/bin/vpnhtb"
+            echo -e "$OK Enlace creado: /usr/local/bin/vpnhtb -> $REAL_HOME/.config/bin/$bin_util"
+        fi
     fi
 done
 

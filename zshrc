@@ -52,7 +52,7 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # ──────────────────────────────────────────────
 # PATH (Kali Linux)
 # ──────────────────────────────────────────────
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+export PATH="$HOME/.config/bin:$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 
 # ──────────────────────────────────────────────
 # Aliases (en Kali bat se llama 'batcat'; el instalador crea el enlace 'bat')
@@ -107,31 +107,49 @@ fi
 # Functions
 # ──────────────────────────────────────────────
 function mkt(){
-    mkdir {nmap,content,exploits,scripts}
+    mkdir -p {nmap,content,exploits,scripts}
 }
 
 # Extract nmap information
 function extractPorts(){
-    ports="$(cat $1 | grep -oP '\d{1,5}/open' | awk '{print $1}' FS='/' | xargs | tr ' ' ',')"
-    ip_address="$(cat $1 | grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | sort -u | head -n 1)"
+    ports="$(cat "$1" | grep -oP '\d{1,5}/open' | awk '{print $1}' FS='/' | xargs | tr ' ' ',')"
+    ip_address="$(cat "$1" | grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | sort -u | head -n 1)"
     echo -e "\n[*] Extracting information...\n" > extractPorts.tmp
     echo -e "\t[*] IP Address: $ip_address"  >> extractPorts.tmp
     echo -e "\t[*] Open ports: $ports\n"  >> extractPorts.tmp
-    echo $ports | tr -d '\n' | xclip -sel clip
+    if command -v wl-copy &>/dev/null; then
+        echo -n "$ports" | wl-copy
+    elif command -v xclip &>/dev/null; then
+        echo -n "$ports" | xclip -sel clip
+    fi
     echo -e "[*] Ports copied to clipboard\n"  >> extractPorts.tmp
-    cat extractPorts.tmp; rm extractPorts.tmp
+    cat extractPorts.tmp; rm -f extractPorts.tmp
 }
 
 # settarget
 function settarget(){
-    if [ -f /usr/local/bin/settarget ]; then
+    if [ -x "$HOME/.config/bin/settarget" ]; then
+        "$HOME/.config/bin/settarget" "$@"
+    elif [ -x /usr/local/bin/settarget ]; then
         /usr/local/bin/settarget "$@"
     elif [ $# -eq 1 ]; then
-        echo $1 > ~/.config/bin/target
+        echo "$1" > ~/.config/bin/target
     elif [ $# -gt 2 ]; then
         echo "settarget [IP] [NAME] | settarget [IP]"
     else
-        echo $1 $2 > ~/.config/bin/target
+        echo "$1" "$2" > ~/.config/bin/target
+    fi
+}
+
+# setports
+function setports(){
+    if [ -x "$HOME/.config/bin/setports" ]; then
+        "$HOME/.config/bin/setports" "$@"
+    elif [ -x /usr/local/bin/setports ]; then
+        /usr/local/bin/setports "$@"
+    else
+        echo "$@" > ~/.config/bin/ports
+        echo "Ports fijados: $@"
     fi
 }
 

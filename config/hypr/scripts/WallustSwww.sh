@@ -40,7 +40,10 @@ else
   if [[ -f "$cache_file" ]]; then
     # The first non-filter line is the original wallpaper path
     # wallpaper_path="$(grep -v 'Lanczos3' "$cache_file" | head -n 1)"
-    wallpaper_path=$(swww query | grep $current_monitor | awk '{print $9}')
+    wallpaper_path=$(swww query 2>/dev/null | grep "$current_monitor" | sed -E 's/.*image: //' || true)
+    if [[ -z "${wallpaper_path:-}" || ! -f "$wallpaper_path" ]]; then
+      wallpaper_path=$(swww query 2>/dev/null | head -n 1 | sed -E 's/.*image: //' || true)
+    fi
   fi
 fi
 
@@ -52,7 +55,9 @@ fi
 # Update helpers that depend on the path
 ln -sf "$wallpaper_path" "$rofi_link" || true
 mkdir -p "$(dirname "$wallpaper_current")"
-echo "$wallpaper_path" > "$wallpaper_current" || true
+if [[ "$wallpaper_path" != "$wallpaper_current" ]]; then
+  cp -f "$wallpaper_path" "$wallpaper_current" || true
+fi
 
 # Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
 # -s is used in this repo to keep things quiet and avoid extra prompts

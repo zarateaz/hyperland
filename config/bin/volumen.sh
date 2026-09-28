@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # Asegúrate de tener pamixer instalado
-volume=$(pamixer --get-volume)
-mute=$(pamixer --get-mute)
+volume=$(pamixer --get-volume 2>/dev/null || echo 0)
+mute=$(pamixer --get-mute 2>/dev/null || echo false)
+
+if ! [[ "$volume" =~ ^[0-9]+$ ]]; then
+    volume=0
+fi
 
 if [ "$mute" = "true" ]; then
     icon=""

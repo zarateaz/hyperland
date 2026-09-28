@@ -1,4 +1,4 @@
-#!/bin/bas
+#!/bin/bash
 # Variables
 mDIR="$HOME/Music/"
 iDIR="$HOME/.config/swaync/icons"

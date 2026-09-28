@@ -33,4 +33,13 @@ if pgrep -x "rofi" >/dev/null; then
 fi
 
 # Open Rofi and pass the selected query to xdg-open for Google search
-echo "" | rofi -dmenu -config "$rofi_theme" -mesg "$msg" | xargs -I{} xdg-open $Search_Engine
+query=$(echo "" | rofi -dmenu -config "$rofi_theme" -mesg "$msg")
+if [[ -n "$query" ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+        encoded_query=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote_plus(sys.argv[1]))" "$query")
+    else
+        encoded_query=$(echo "$query" | tr ' ' '+')
+    fi
+    url="${Search_Engine//\{\}/$encoded_query}"
+    xdg-open "$url" &
+fi

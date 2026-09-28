@@ -63,6 +63,11 @@ mapfile -d '' PICS < <(find -L "${wallDIR}" -type f \( \
   -iname "*.bmp" -o -iname "*.tiff" -o -iname "*.webp" -o \
   -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.webm" \) -print0)
 
+if [ ${#PICS[@]} -eq 0 ]; then
+  notify-send -i "$iDIR/error.png" "No Wallpapers" "No wallpapers found in $wallDIR"
+  exit 1
+fi
+
 RANDOM_PIC="${PICS[$((RANDOM % ${#PICS[@]}))]}"
 RANDOM_PIC_NAME=". random"
 

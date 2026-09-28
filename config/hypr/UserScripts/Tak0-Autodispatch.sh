@@ -31,9 +31,9 @@
 # - Скрипт чекає до ~9 секунд (30 ітерацій по 0.3 сек) поки вікно з'явиться.
 # - Використовує hyprctl і jq, тому ці інструменти мають бути встановлені.
 
-LOGFILE="$(dirname "$0")/dispatch.log"
-# Log file path located next to the script.
-# Файл логів розташований поруч зі скриптом.
+LOGFILE="$HOME/.cache/hypr/dispatch.log"
+mkdir -p "$(dirname "$LOGFILE")" 2>/dev/null || true
+# Log file path located in cache directory.
 
 APP=$1
 # The application command or window class to launch or match.
