@@ -71,11 +71,24 @@ elif command -v batcat &>/dev/null; then
     alias catnl='batcat'
 fi
 alias catn='/bin/cat'
-alias update='sudo apt update && sudo apt full-upgrade -y'
+if command -v pacman &>/dev/null; then
+    if command -v paru &>/dev/null; then
+        alias update='paru -Syu'
+    elif command -v yay &>/dev/null; then
+        alias update='yay -Syu'
+    else
+        alias update='sudo pacman -Syu'
+    fi
+elif command -v apt &>/dev/null; then
+    alias update='sudo apt update && sudo apt full-upgrade -y'
+fi
 
 # FZF
 if [ -f ~/.fzf.zsh ]; then
     source ~/.fzf.zsh
+elif [ -f /usr/share/fzf/key-bindings.zsh ]; then
+    source /usr/share/fzf/key-bindings.zsh
+    [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
 elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
     source /usr/share/doc/fzf/examples/key-bindings.zsh
     [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh

@@ -38,8 +38,6 @@ else
   done
 
   if [[ -f "$cache_file" ]]; then
-    # The first non-filter line is the original wallpaper path
-    # wallpaper_path="$(grep -v 'Lanczos3' "$cache_file" | head -n 1)"
     wallpaper_path=$(swww query 2>/dev/null | grep "$current_monitor" | sed -E 's/.*image: //' || true)
     if [[ -z "${wallpaper_path:-}" || ! -f "$wallpaper_path" ]]; then
       wallpaper_path=$(swww query 2>/dev/null | head -n 1 | sed -E 's/.*image: //' || true)
@@ -59,11 +57,36 @@ if [[ "$wallpaper_path" != "$wallpaper_current" ]]; then
   cp -f "$wallpaper_path" "$wallpaper_current" || true
 fi
 
-# Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
-# -s is used in this repo to keep things quiet and avoid extra prompts
-wallust run -s "$wallpaper_path" || true
+# Run wallust to regenerate color templates
+# Optimization: For very large images, use a downscaled preview for sub-second color generation
+if command -v magick >/dev/null 2>&1; then
+    magick "$wallpaper_path" -resize 720x720\> /tmp/wallust_preview.jpg 2>/dev/null || true
+    if [ -f /tmp/wallust_preview.jpg ]; then
+        wallust run -s /tmp/wallust_preview.jpg || wallust run -s "$wallpaper_path" || true
+    else
+        wallust run -s "$wallpaper_path" || true
+    fi
+else
+    wallust run -s "$wallpaper_path" || true
+fi
 
-# Compile and apply the dynamic cursor theme with the new colors (run in background to avoid lag on low-end devices)
+# Sync with Caelestia Shell (Quickshell)
+mkdir -p "$HOME/.local/state/caelestia/wallpaper"
+echo "$wallpaper_path" > "$HOME/.local/state/caelestia/wallpaper/path.txt"
+if command -v caelestia >/dev/null 2>&1; then
+    caelestia shell wallpaper set "$wallpaper_path" 2>/dev/null || true
+fi
+
+# Refresh UI components
+pkill -SIGUSR2 waybar 2>/dev/null || true   # Waybar colors
+pkill -SIGUSR1 kitty  2>/dev/null || true   # Kitty colors
+
+# Update SDDM login screen wallpaper in background
+if [[ -f "$HOME/.config/hypr/scripts/sddm_wallpaper.sh" ]]; then
+    (bash "$HOME/.config/hypr/scripts/sddm_wallpaper.sh" --normal "$wallpaper_path" >> /tmp/sddm_update.log 2>&1 &)
+fi
+
+# Compile and apply dynamic cursor theme if present
 if [ -f "$HOME/.config/hypr/scripts/CompileCursor.sh" ]; then
     bash "$HOME/.config/hypr/scripts/CompileCursor.sh" &
 fi
