@@ -278,12 +278,22 @@ mkdir -p "$REAL_HOME/.config"
 # Limpiar enlaces rotos antes de copiar
 find "$REAL_HOME/.config" -xtype l -delete 2>/dev/null || true
 
-# Copiar todas las carpetas de config/
-for dir in "$BASE_DIR"/config/*/; do
-    dirname=$(basename "$dir")
-    echo -e "$INFO  → .config/$dirname"
-    cp -r "$dir" "$REAL_HOME/.config/"
-done
+# Copiar todas las carpetas de config/ o configs/
+CONFIG_SRC=""
+if [ -d "$BASE_DIR/config" ]; then
+    CONFIG_SRC="$BASE_DIR/config"
+elif [ -d "$BASE_DIR/configs" ]; then
+    CONFIG_SRC="$BASE_DIR/configs"
+fi
+
+if [ -n "$CONFIG_SRC" ]; then
+    for dir in "$CONFIG_SRC"/*/; do
+        [ -d "$dir" ] || continue
+        dirname=$(basename "$dir")
+        echo -e "$INFO  → .config/$dirname"
+        cp -r "$dir" "$REAL_HOME/.config/"
+    done
+fi
 rm -f "$REAL_HOME/.config/hypr/.initial_startup_done"
 
 # Desplegar Caelestia Shell en ~/.config/quickshell/caelestia
