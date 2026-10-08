@@ -29,6 +29,7 @@ GDK_BACKEND=$BACKEND yad \
 "" "" "" \
 " enter" "Terminal" "(kitty)" \
 " SHIFT enter" "DropDown Terminal" " Q to close" \
+" V" "Toggle Split (H/V)" "Dwindle Layout" \
 " B" "Launch Browser" "(Default browser)" \
 " A" "Desktop Overview" "(AGS - if opted to install)" \
 " D" "Application Launcher" "(rofi-wayland)" \

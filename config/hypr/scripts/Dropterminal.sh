@@ -35,7 +35,7 @@ TERMINAL_CMD="$1"
 # Debug echo function
 debug_echo() {
     if [ "$DEBUG" = true ]; then
-        echo "$@"
+        echo "$@" >&2
     fi
 }
 
