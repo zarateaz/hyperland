@@ -159,7 +159,7 @@ official_packages=(
     waybar swaync rofi-wayland wlogout yad qalculate-gtk
 
     # Fondos y Theming
-    swww waypaper wallust imagemagick
+    bc swww awww waypaper wallust imagemagick
 
     # Terminales y Utilidades de Consola
     kitty alacritty fastfetch btop fzf bat lsd mpv yt-dlp
@@ -254,11 +254,27 @@ for plugin in zsh-autosuggestions zsh-syntax-highlighting; do
             "$REAL_HOME/.oh-my-zsh/custom/plugins/$plugin"
     fi
 done
+if [ ! -d "$REAL_HOME/.oh-my-zsh/custom/plugins/fzf-tab" ]; then
+    run_safe git clone --depth=1 "https://github.com/Aloxaf/fzf-tab" \
+        "$REAL_HOME/.oh-my-zsh/custom/plugins/fzf-tab"
+fi
 
 # Copiar configs de Zsh
 [ -f "$BASE_DIR/zshrc" ] && cp -f "$BASE_DIR/zshrc" "$REAL_HOME/.zshrc"
 [ -f "$BASE_DIR/.p10k.zsh" ] && cp -f "$BASE_DIR/.p10k.zsh" "$REAL_HOME/.p10k.zsh"
 echo -e "$OK Configuración Zsh copiada"
+
+# Establecer Zsh como shell por defecto (necesario para autocompletado/autosuggestions)
+ZSH_BIN="$(command -v zsh)"
+if [ -n "$ZSH_BIN" ]; then
+    grep -qx "$ZSH_BIN" /etc/shells || echo "$ZSH_BIN" | sudo tee -a /etc/shells >/dev/null
+    CURRENT_USER="$(id -un)"
+    if [ "$(getent passwd "$CURRENT_USER" | cut -d: -f7)" != "$ZSH_BIN" ]; then
+        run_safe sudo chsh -s "$ZSH_BIN" "$CURRENT_USER"
+        echo -e "$OK Zsh establecido como shell por defecto para $CURRENT_USER"
+    fi
+    [ -d "/root" ] && run_safe sudo chsh -s "$ZSH_BIN" root
+fi
 
 # Configurar para root (opcional para consistencia)
 if [ -d "/root" ]; then
@@ -267,6 +283,13 @@ if [ -d "/root" ]; then
         run_safe sudo cp -rn "$REAL_HOME/.oh-my-zsh/custom/themes/powerlevel10k" /root/.oh-my-zsh/custom/themes/
     [ -f "$BASE_DIR/zshrcroot" ] && run_safe sudo cp -f "$BASE_DIR/zshrcroot" /root/.zshrc
     [ -f "$BASE_DIR/p10k.zshroot" ] && run_safe sudo cp -f "$BASE_DIR/p10k.zshroot" /root/.p10k.zsh
+fi
+
+# Compatibilidad de utilidades (awww -> swww)
+mkdir -p "$REAL_HOME/.local/bin"
+if command -v awww &>/dev/null && [ ! -x "$REAL_HOME/.local/bin/swww" ]; then
+    ln -sf "$(command -v awww)" "$REAL_HOME/.local/bin/swww"
+    ln -sf "$(command -v awww-daemon)" "$REAL_HOME/.local/bin/swww-daemon"
 fi
 
 # ─────────────────────────────────────────
@@ -293,6 +316,7 @@ if [ -n "$CONFIG_SRC" ]; then
         echo -e "$INFO  → .config/$dirname"
         cp -r "$dir" "$REAL_HOME/.config/"
     done
+    [ -f "$CONFIG_SRC/starship.toml" ] && cp -f "$CONFIG_SRC/starship.toml" "$REAL_HOME/.config/starship.toml"
 fi
 rm -f "$REAL_HOME/.config/hypr/.initial_startup_done"
 
@@ -313,6 +337,9 @@ echo -e "$OK Celestial Shell desplegado"
 # Desplegar Wallpapers
 PICS_DIR=$(xdg-user-dir PICTURES 2>/dev/null || echo "$REAL_HOME/Pictures")
 mkdir -p "$PICS_DIR/wallpapers"
+if [ "$PICS_DIR" != "$REAL_HOME/Pictures" ] && [ ! -e "$REAL_HOME/Pictures" ]; then
+    ln -s "$PICS_DIR" "$REAL_HOME/Pictures"
+fi
 if [ -d "$BASE_DIR/wallpapers" ]; then
     cp -rn "$BASE_DIR"/wallpapers/* "$PICS_DIR/wallpapers/" 2>/dev/null || true
     echo -e "$OK Wallpapers copiados a $PICS_DIR/wallpapers"

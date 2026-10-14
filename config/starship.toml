@@ -1,0 +1,44 @@
+add_newline = false
+
+format = """
+[╭─](bold #00f0ff)\
+[ 󰘧 ](bold #00f0ff)\
+[zarate](bold #00ffff)\
+[ 󰅂 ](bold #ff007f)\
+$directory\
+$git_branch\
+$git_status\
+$cmd_duration\
+$line_break\
+[╰─](bold #00f0ff)\
+[󱐋](bold #00ff9f) $character"""
+
+[directory]
+format = "[ $path ](bold #ff007f)"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+
+[git_branch]
+format = "[ $branch ](bold #bd93f9)"
+
+[git_status]
+format = "([$all_status$ahead_behind ](bold #ffd166))"
+conflicted = "󰞇 "
+ahead = "󰶣${count} "
+behind = "󰶡${count} "
+diverged = "󰹹 "
+untracked = " "
+stashed = "📦 "
+modified = " "
+staged = "󰸞 "
+renamed = "󰑕 "
+deleted = "🗑 "
+
+[cmd_duration]
+min_time = 2000
+format = "[󱎫 $duration ](bold #ffd166)"
+
+[character]
+success_symbol = "[❯](bold #00f0ff)"
+error_symbol = "[✖](bold #ff0055)"

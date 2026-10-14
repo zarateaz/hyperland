@@ -24,27 +24,39 @@ HISTSIZE=1000
 SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
-# Use modern completion system
+# ──────────────────────────────────────────────
+# 🌌 COMPLETION SYSTEM & FZF-TAB (HUD FUTURISTA)
+# ──────────────────────────────────────────────
 autoload -Uz compinit
-compinit
+compinit -d ~/.zcompdump
+
+setopt ALWAYS_TO_END
+setopt AUTO_MENU
+setopt COMPLETE_IN_WORD
 
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
-zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' format '\e[1;36m[Completing %d]\e[0m'
 zstyle ':completion:*' group-name ''
-zstyle ':completion:*' menu select=2
-eval "$(dircolors -b)"
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-zstyle ':completion:*' menu select=long
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
 zstyle ':completion:*' verbose true
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+# FZF Neon Cyber Theme
+export FZF_DEFAULT_OPTS=" --color=bg+:#1e2030,bg:#0a0f18,spinner:#ff007f,hl:#00f0ff --color=fg:#cdd6f4,header:#ff007f,info:#bd93f9,pointer:#00f0ff --color=marker:#00ff9f,fg+:#ffffff,prompt:#00f0ff,hl+:#00f0ff --prompt='󰍉 ' --pointer='󱐋 ' --marker='󰸞 ' --border=rounded"
+
+# Cargar fzf-tab (Menu flotante interactivo con vista previa)
+if [ -f "$HOME/.oh-my-zsh/custom/plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
+    source "$HOME/.oh-my-zsh/custom/plugins/fzf-tab/fzf-tab.plugin.zsh"
+fi
+
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --icons=always --color=always $realpath 2>/dev/null'
+zstyle ':fzf-tab:complete:(cat|bat|nano|vim|nvim|mousepad):*' fzf-preview 'bat --color=always --line-range :50 $realpath 2>/dev/null || cat $realpath 2>/dev/null'
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,%cpu,%mem,command -w -w"
+zstyle ':fzf-tab:complete:(kill|pkill|killall):*' fzf-preview '[[ $group == "[process ID]" ]] && ps -p $word -o pid,user,%cpu,%mem,command -w -w 2>/dev/null'
+zstyle ':fzf-tab:complete:(kill|pkill|killall):*' fzf-flags --preview-window=down:3:wrap
+zstyle ':fzf-tab:complete:git-(checkout|switch|diff):*' fzf-preview 'git log --oneline --graph --color=always $word 2>/dev/null'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
@@ -57,11 +69,18 @@ export PATH="$HOME/.config/bin:$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/bin:
 # ──────────────────────────────────────────────
 # Aliases (en Kali bat se llama 'batcat'; el instalador crea el enlace 'bat')
 # ──────────────────────────────────────────────
-alias ll='lsd -lh --group-dirs=first'
-alias la='lsd -a --group-dirs=first'
-alias l='lsd --group-dirs=first'
-alias lla='lsd -lha --group-dirs=first'
-alias ls='lsd --group-dirs=first'
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons=always --color=always --group-directories-first'
+    alias ll='eza -lh --icons=always --color=always --git --group-directories-first'
+    alias la='eza -a --icons=always --color=always --group-directories-first'
+    alias lla='eza -lha --icons=always --color=always --git --group-directories-first'
+    alias tree='eza --tree --icons=always'
+else
+    alias ls='lsd --icon=always --group-dirs=first'
+    alias ll='lsd -lh --icon=always --group-dirs=first'
+    alias la='lsd -a --icon=always --group-dirs=first'
+    alias lla='lsd -lha --icon=always --group-dirs=first'
+fi
 if command -v bat &>/dev/null; then
     alias cat='bat --paging=never'
     alias catnl='bat'
@@ -95,20 +114,58 @@ elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
 fi
 
 # ──────────────────────────────────────────────
-# Plugins (Kali: paths en /usr/share/)
+# ⚡ AUTOSUGGESTIONS & SYNTAX HIGHLIGHTING
 # ──────────────────────────────────────────────
-# zsh-syntax-highlighting
-if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi
+# zsh-autosuggestions: texto de sugerencia en blanco brillante (#ffffff,bold)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#ffffff,bold'
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50
 
-# zsh-autosuggestions
-if [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+if [ -f "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+    source "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
     source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 elif [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
     source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# Atajos ultra rápidos para aceptar sugerencias:
+bindkey '^ ' autosuggest-accept        # Ctrl + Espacio: aceptar sugerencia completa
+bindkey '^E' autosuggest-accept        # Ctrl + E: aceptar sugerencia completa
+bindkey '^[[C' forward-char            # Flecha Derecha: avanzar / aceptar
+bindkey '^[OC' forward-char            # Flecha Derecha (numpad/kitty)
+bindkey '^[[1;5C' forward-word         # Ctrl + Flecha Derecha: aceptar palabra por palabra
+bindkey '^[[F' end-of-line             # Tecla Fin: aceptar sugerencia completa
+
+# Paleta Neón Cyberpunk de alta visibilidad para zsh-syntax-highlighting
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=#00ff9f,bold'             # Comandos válidos en verde neón brillante
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#00f0ff,bold'             # Builtins (cd, echo, etc) en cian neón
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#00f0ff,bold'               # Aliases en cian neón
+ZSH_HIGHLIGHT_STYLES[function]='fg=#38bdf8,bold'            # Funciones en celeste vibrante
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff4365,bold'       # Comandos inválidos/errores en rojo neón
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#c084fc,bold'       # Palabras clave (if, for, etc) en violeta
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#ffd166,bold'   # Banderas cortas (-la) en amarillo oro
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#ffd166,bold'   # Banderas largas (--all) en amarillo oro
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#ffe082'   # Strings '...' en amarillo suave
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#ffe082'   # Strings "..." en amarillo suave
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#ffe082'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#67e8f9,underline'           # Rutas existentes en cian subrayado
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#67e8f9'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#ff007f,bold'            # Wildcards (*.txt) en fucsia neón
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#00f0ff,bold'
+ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=#c084fc'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#ff007f,bold'         # Redirecciones (> >> |) en fucsia
+ZSH_HIGHLIGHT_STYLES[assign]='fg=#00ff9f,bold'              # Variables VAR=val
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#6272a4,italic'           # Comentarios
+
+# zsh-syntax-highlighting (DEBE cargarse al final)
+if [ -f "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+    source "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
 # zsh-sudo (descargado por install.sh)
@@ -208,3 +265,7 @@ bindkey "^[[F" end-of-line
 bindkey "^[[3~" delete-char
 bindkey "^[[1;3C" forward-word
 bindkey "^[[1;3D" backward-word
+
+
+# Added by Antigravity CLI installer
+export PATH="$HOME/.local/bin:$PATH"
