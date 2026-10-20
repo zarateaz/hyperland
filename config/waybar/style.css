@@ -4,10 +4,11 @@
 @define-color white         #FFFFFF;
 @define-color black         #000000;
 @define-color bright-text   #FFFFFF;
-@define-color bright-purple #D8B4FE;
-@define-color neon-purple   #C084FC;
-@define-color border-purple #A855F7;
-@define-color bg-module     rgba(20, 12, 35, 0.75);
+
+@define-color dynamic-accent       @color6;
+@define-color dynamic-accent-alt   @color5;
+@define-color dynamic-border       @color4;
+@define-color bg-module            rgba(0, 0, 0, 0.70);
 
 @define-color lightgray     #A0A0A0;
 @define-color darkgray      #353535;
@@ -17,9 +18,9 @@
 @define-color cyan          rgba(53, 140, 169, 1);
 
 @define-color background-module     @bg-module;
-@define-color border-color          @border-purple;
-@define-color button-color          @neon-purple;
-@define-color button-hover          @bright-purple;
+@define-color border-color          @dynamic-accent;
+@define-color button-color          @dynamic-accent;
+@define-color button-hover          @dynamic-accent-alt;
 
 * {
     font-family: "JetBrainsMono Nerd Font";
@@ -66,9 +67,9 @@ tooltip {
 #workspaces {
     padding: 0px 4px;
     border-radius: 15px;
-    border: 2px solid @border-purple;
+    border: 2px solid @dynamic-accent;
     background-color: @bg-module;
-    box-shadow: 0 0 10px rgba(168, 85, 247, 0.45);
+    box-shadow: 0 0 10px alpha(@dynamic-accent, 0.45);
     font-weight: bold;
     color: @bright-text;
 }
@@ -86,12 +87,12 @@ tooltip {
 #taskbar button.active,
 #workspaces button.active {
     color: #FFFFFF;
-    background-color: rgba(168, 85, 247, 0.45);
+    background-color: alpha(@dynamic-accent, 0.45);
     border-radius: 15px;
     padding-left: 8px;
     padding-right: 8px;
-    text-shadow: 0 0 8px #E879F9;
-    box-shadow: 0 0 8px rgba(232, 121, 249, 0.6);
+    text-shadow: 0 0 8px @dynamic-accent;
+    box-shadow: 0 0 8px alpha(@dynamic-accent, 0.6);
 }
 
 #workspaces button.focused {
@@ -106,11 +107,11 @@ tooltip {
 #taskbar button:hover,
 #workspaces button:hover {
     color: #FFFFFF;
-    background-color: rgba(192, 132, 252, 0.3);
+    background-color: alpha(@dynamic-accent-alt, 0.3);
     border-radius: 10px;
     padding-left: 4px;
     padding-right: 4px;
-    text-shadow: 0 0 6px #C084FC;
+    text-shadow: 0 0 6px @dynamic-accent-alt;
 }
 
 #temperature.critical {
@@ -202,7 +203,7 @@ tooltip {
     color: #FFFFFF;
     background-color: @bg-module;
     border-radius: 15px;
-    border-bottom: 2px solid @border-purple;
+    border-bottom: 2px solid @dynamic-accent;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     text-shadow: 0 0 3px rgba(255, 255, 255, 0.35);
 
@@ -225,14 +226,14 @@ tooltip {
 #custom-battery:hover,
 #custom-power:hover {
     color: #FFFFFF;
-    border-bottom: 2px solid @bright-purple;
-    box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+    border-bottom: 2px solid @dynamic-accent-alt;
+    box-shadow: 0 0 8px alpha(@dynamic-accent-alt, 0.6);
 }
 
 #custom-launcher {
     font-size: 19px;
-    color: @bright-purple;
-    text-shadow: 0 0 10px rgba(192, 132, 252, 0.85);
+    color: @dynamic-accent;
+    text-shadow: 0 0 10px alpha(@dynamic-accent, 0.85);
 
     padding-top: 2px;
     padding-bottom: 0px;
@@ -246,7 +247,7 @@ tooltip {
 
 #custom-launcher:hover {
     color: #FFFFFF;
-    text-shadow: 0 0 14px #C084FC;
+    text-shadow: 0 0 14px @dynamic-accent-alt;
 }
 
 
