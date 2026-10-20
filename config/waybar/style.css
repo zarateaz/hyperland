@@ -1,20 +1,25 @@
-@define-color white         #F2F2F2;
+@import '../../.config/waybar/wallust/colors-waybar.css';
+@import "../waybar/style/catppuccin-themes/latte.css";
+
+@define-color white         #FFFFFF;
 @define-color black         #000000;
-@define-color text          @foreground;
-@define-color lightgray     #686868;
+@define-color bright-text   #FFFFFF;
+@define-color bright-purple #D8B4FE;
+@define-color neon-purple   #C084FC;
+@define-color border-purple #A855F7;
+@define-color bg-module     rgba(20, 12, 35, 0.75);
+
+@define-color lightgray     #A0A0A0;
 @define-color darkgray      #353535;
 
 @define-color transparent   rgba(1, 1, 1, 0.5);
 @define-color teal-trans    rgba(1, 117, 84, 0.5);
 @define-color cyan          rgba(53, 140, 169, 1);
 
-@define-color background-module     @transparent;
-@define-color border-color          @color12;
-@define-color button-color          @color11;
-@define-color button-hover          @color13;
-
-@import '../../.config/waybar/wallust/colors-waybar.css';
-@import "../waybar/style/catppuccin-themes/latte.css";
+@define-color background-module     @bg-module;
+@define-color border-color          @border-purple;
+@define-color button-color          @neon-purple;
+@define-color button-hover          @bright-purple;
 
 * {
     font-family: "JetBrainsMono Nerd Font";
@@ -29,7 +34,7 @@ window#waybar {
   transition-duration: 0.5s;
   background: transparent;
   border-radius: 6px;
-  color: @foreground;
+  color: @bright-text;
 }
 
 window#waybar.hidden {
@@ -59,47 +64,53 @@ tooltip {
 }
 
 #workspaces {
-    padding: 0px 1px;
+    padding: 0px 4px;
     border-radius: 15px;
-    border: 2px solid @border-color;
+    border: 2px solid @border-purple;
+    background-color: @bg-module;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.45);
     font-weight: bold;
-    opacity: 0.8;
-    color: @foreground;
+    color: @bright-text;
 }
 
 #taskbar button,
 #workspaces button {
-    color: @foreground;
+    color: #F1F5F9;
+    font-size: 100%;
     border-radius: 30px;
-    padding-left: 4px;
-    padding-right: 4px;
-    transition: all 0.5s cubic-bezier(.55, -0.68, .48, 1.682);
+    padding-left: 5px;
+    padding-right: 5px;
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #taskbar button.active,
 #workspaces button.active {
-    color: @color13;
-    background-color: transparent;
+    color: #FFFFFF;
+    background-color: rgba(168, 85, 247, 0.45);
     border-radius: 15px;
     padding-left: 8px;
     padding-right: 8px;
+    text-shadow: 0 0 8px #E879F9;
+    box-shadow: 0 0 8px rgba(232, 121, 249, 0.6);
 }
 
 #workspaces button.focused {
-    color: @foreground;
+    color: #FFFFFF;
 }
 
 #workspaces button.urgent {
-    color: @color0;
+    color: #FF5555;
     border-radius: 10px;
 }
 
 #taskbar button:hover,
 #workspaces button:hover {
-    color: @color13;
+    color: #FFFFFF;
+    background-color: rgba(192, 132, 252, 0.3);
     border-radius: 10px;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    text-shadow: 0 0 6px #C084FC;
 }
 
 #temperature.critical {
@@ -188,23 +199,40 @@ tooltip {
 #custom-volumen,
 #custom-battery,
 #custom-power {
-    background-color: @background-module;
+    color: #FFFFFF;
+    background-color: @bg-module;
     border-radius: 15px;
-    border-bottom: 2px solid @border-color;
+    border-bottom: 2px solid @border-purple;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.35);
 
     padding-top: 2px;
     padding-bottom: 0px;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
 
     margin-left: 3px;
     margin-right: 3px;
+    transition: all 0.25s ease;
+}
+
+#custom-clock:hover,
+#custom-ethernet:hover,
+#custom-vpn:hover,
+#custom-target:hover,
+#custom-ports:hover,
+#custom-volumen:hover,
+#custom-battery:hover,
+#custom-power:hover {
+    color: #FFFFFF;
+    border-bottom: 2px solid @bright-purple;
+    box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
 }
 
 #custom-launcher {
-    font-size: 18px;
-    padding-top: 0px;     
-    padding-bottom: 0px;
+    font-size: 19px;
+    color: @bright-purple;
+    text-shadow: 0 0 10px rgba(192, 132, 252, 0.85);
 
     padding-top: 2px;
     padding-bottom: 0px;
@@ -213,6 +241,12 @@ tooltip {
 
     margin-left: 3px;
     margin-right: 3px;
+    transition: all 0.25s ease;
+}
+
+#custom-launcher:hover {
+    color: #FFFFFF;
+    text-shadow: 0 0 14px #C084FC;
 }
 
 
