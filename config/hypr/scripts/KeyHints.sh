@@ -30,6 +30,9 @@ GDK_BACKEND=$BACKEND yad \
 " enter" "Terminal" "(kitty)" \
 " SHIFT enter" "DropDown Terminal" " Q to close" \
 " V" "Toggle Split (H/V)" "Dwindle Layout" \
+"CTRL SHIFT D / enter" "CLI Doble Ventana (Split V)" "(kitty CLI)" \
+"CTRL SHIFT O" "CLI Doble Ventana (Split H)" "(kitty CLI)" \
+"CTRL SHIFT Z" "CLI Zoom / Alternar Panel" "(kitty CLI)" \
 " B" "Launch Browser" "(Default browser)" \
 " A" "Desktop Overview" "(AGS - if opted to install)" \
 " D" "Application Launcher" "(rofi-wayland)" \
