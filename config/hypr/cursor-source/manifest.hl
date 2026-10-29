@@ -1,0 +1,4 @@
+name = Dynamic-Cursor
+description = A dynamically colored cursor theme
+version = 0.1
+cursors_directory = hyprcursors

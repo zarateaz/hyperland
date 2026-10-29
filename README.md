@@ -22,15 +22,21 @@
 
 ---
 
-## 🛠️ Instalación en un Solo Comando (Arch Linux)
+## 🛠️ Instalación en un Solo Comando (Arch / Garuda Linux)
 
-Ejecuta el siguiente comando en tu terminal como usuario normal (no root):
+Ejecuta **un solo comando** en tu terminal como usuario normal (sin `sudo`):
 
 ```bash
-git clone https://github.com/zarateaz/hyperland.git && cd hyperland && chmod +x install.sh && ./install.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/zarateaz/hyperland/main/install.sh)
 ```
 
-> **Nota:** El instalador detecta si tienes `yay` o `paru`, resuelve conflictos entre paquetes automáticamente, compila las herramientas necesarias, activa servicios de audio PipeWire y genera la configuración óptima para tu monitor y touchpad.
+O clonando el repositorio directamente:
+
+```bash
+git clone --depth=1 https://github.com/zarateaz/hyperland.git && cd hyperland && ./install.sh
+```
+
+> **Nota:** El instalador detecta si tienes `yay` o `paru`, resuelve conflictos entre paquetes automáticamente, compila las herramientas necesarias, activa servicios de audio PipeWire y genera la configuración óptima para tu monitor y touchpad con **0 margen de error**.
 
 ---
 

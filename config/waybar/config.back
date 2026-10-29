@@ -105,7 +105,7 @@
 
     "custom/launcher": {
         "format": " ",
-        "on-click": "$HOME/.config/rofi/launchers/type-5/launcher.sh",
+        "on-click": "pkill rofi || rofi -show drun -modi drun,filebrowser,run,window",
         "on-click-right": "killall rofi"
     },
 
