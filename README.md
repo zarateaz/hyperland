@@ -22,7 +22,7 @@
 
 ---
 
-## 🛠️ Instalación en un Solo Comando (Arch / Garuda Linux)
+## 🛠️ Instalación en un Solo Comando / Un Solo Click (Arch / Garuda Linux)
 
 Ejecuta **un solo comando** en tu terminal como usuario normal (sin `sudo`):
 
@@ -36,7 +36,19 @@ O clonando el repositorio directamente:
 git clone --depth=1 https://github.com/zarateaz/hyperland.git && cd hyperland && ./install.sh
 ```
 
-> **Nota:** El instalador detecta si tienes `yay` o `paru`, resuelve conflictos entre paquetes automáticamente, compila las herramientas necesarias, activa servicios de audio PipeWire y genera la configuración óptima para tu monitor y touchpad con **0 margen de error**.
+### ⚡ Reparación / Actualización Rápida de Dotfiles (2 Segundos)
+Si ya tienes los paquetes instalados y solo quieres restaurar o actualizar todas las configuraciones, atajos de teclado y barra sin reinstalar paquetes:
+
+```bash
+cd ~/hyperland && ./install.sh --quick
+```
+O directamente con curl:
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/zarateaz/hyperland/main/install.sh) --quick
+```
+
+> **Un solo click en entorno gráfico**: Puedes hacer doble click directamente en el archivo `Instalar-Hyperland.desktop` en tu explorador de archivos.
+> **Nota:** El instalador detecta si tienes `yay` o `paru`, sincroniza llaves de pacman, resuelve dependencias automáticamente, activa servicios y genera la configuración óptima para tu monitor y touchpad con **0 margen de error**.
 
 ---
 

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Instalar / Reparar Hyperland Celestial
+Comment=Instalador automático con un solo click para Hyperland Celestial
+Exec=bash -c 'SCRIPT_DIR="$(cd "$(dirname "%k")" 2>/dev/null && pwd)"; if [ -f "$SCRIPT_DIR/install.sh" ]; then bash "$SCRIPT_DIR/install.sh"; elif [ -f "$HOME/hyperland/install.sh" ]; then bash "$HOME/hyperland/install.sh"; else bash <(curl -fsSL https://raw.githubusercontent.com/zarateaz/hyperland/main/install.sh); fi; echo ""; echo "Presiona Enter para cerrar..."; read'
+Icon=preferences-desktop-theme
+Terminal=true
+Categories=System;Settings;

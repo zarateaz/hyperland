@@ -22,11 +22,15 @@ effect="--transition-bezier .43,1.19,1,.4 --transition-fps 30 --transition-type 
 # Check if a marker file exists.
 if [ ! -f "$HOME/.config/hypr/.initial_startup_done" ]; then
     sleep 1
-    # Initialize wallust and wallpaper
-	if [ -f "$wallpaper" ]; then
-		wallust run -s "$wallpaper" > /dev/null 2>&1
-		swww query > /dev/null 2>&1 || (swww-daemon & sleep 1)
-		$swww "$wallpaper" $effect > /dev/null 2>&1
+	# Initialize wallpaper via startup_wallpaper.sh if available
+	if [ -x "$scriptsDir/startup_wallpaper.sh" ]; then
+		"$scriptsDir/startup_wallpaper.sh" > /dev/null 2>&1 &
+	elif [ -f "$wallpaper" ]; then
+		WALL_CMD="swww"
+		command -v swww &>/dev/null || WALL_CMD="awww"
+		wallust run -s "$wallpaper" > /dev/null 2>&1 || true
+		$WALL_CMD query > /dev/null 2>&1 || (${WALL_CMD}-daemon & sleep 1)
+		$WALL_CMD img "$wallpaper" $effect > /dev/null 2>&1 || true
 		"$scriptsDir/WallustSwww.sh" > /dev/null 2>&1 & 
 	fi
      
