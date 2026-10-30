@@ -177,18 +177,28 @@ apply_image_wallpaper() {
 
   kill_wallpaper_for_image
 
-  if ! pgrep -x "swww-daemon" >/dev/null; then
-    echo "Starting swww-daemon..."
-    swww-daemon --format xrgb &
+  # Ensure daemon is running and socket is ready
+  if ! swww query >/dev/null 2>&1 && ! pgrep -x "swww-daemon" >/dev/null && ! pgrep -x "awww-daemon" >/dev/null; then
+    echo "Starting wallpaper daemon..."
+    if command -v swww-daemon &>/dev/null; then
+      swww-daemon --format xrgb &
+    elif command -v awww-daemon &>/dev/null; then
+      awww-daemon --format xrgb &
+    fi
+    for i in {1..30}; do
+      swww query >/dev/null 2>&1 && break
+      sleep 0.1
+    done
   fi
 
-  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS
+  # Apply wallpaper to focused monitor, or all monitors if monitor not matched
+  swww img -o "$focused_monitor" "$image_path" $SWWW_PARAMS 2>/dev/null || swww img "$image_path" $SWWW_PARAMS
 
   # Run additional scripts (pass the image path to avoid cache race conditions)
   "$SCRIPTSDIR/WallustSwww.sh" "$image_path"
-  sleep 2
-  "$SCRIPTSDIR/Refresh.sh"
   sleep 1
+  "$SCRIPTSDIR/Refresh.sh" &
+  sleep 0.5
 
   set_sddm_wallpaper
 }

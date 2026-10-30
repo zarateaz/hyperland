@@ -221,18 +221,35 @@ deploy_dotfiles() {
         [ -f "$REAL_HOME/.config/bin/$f" ] && chmod +x "$REAL_HOME/.config/bin/$f" 2>/dev/null || true
     done
 
-    # Enlaces de compatibilidad swww <-> awww
-    for tool in awww swww; do
-        if command -v "$tool" &>/dev/null; then
-            BIN_PATH="$(command -v "$tool")"
-            ln -sf "$BIN_PATH" "$REAL_HOME/.local/bin/swww" 2>/dev/null || true
-            ln -sf "$BIN_PATH" "$REAL_HOME/.local/bin/awww" 2>/dev/null || true
-            if sudo -n true 2>/dev/null; then
-                sudo ln -sf "$BIN_PATH" /usr/local/bin/swww 2>/dev/null || true
-                sudo ln -sf "$BIN_PATH" /usr/local/bin/awww 2>/dev/null || true
-            fi
+    # Enlaces de compatibilidad swww <-> awww (evitando enlaces circulares)
+    SYS_AWWW="$(PATH="/usr/bin:/usr/local/bin:/bin" which awww 2>/dev/null || true)"
+    SYS_SWWW="$(PATH="/usr/bin:/usr/local/bin:/bin" which swww 2>/dev/null || true)"
+    ACTIVE_BIN="${SYS_AWWW:-$SYS_SWWW}"
+
+    SYS_AWWW_DAEMON="$(PATH="/usr/bin:/usr/local/bin:/bin" which awww-daemon 2>/dev/null || true)"
+    SYS_SWWW_DAEMON="$(PATH="/usr/bin:/usr/local/bin:/bin" which swww-daemon 2>/dev/null || true)"
+    ACTIVE_DAEMON="${SYS_AWWW_DAEMON:-$SYS_SWWW_DAEMON}"
+
+    if [ -n "$ACTIVE_BIN" ] && [ -x "$ACTIVE_BIN" ]; then
+        rm -f "$REAL_HOME/.local/bin/swww" "$REAL_HOME/.local/bin/awww"
+        ln -sf "$ACTIVE_BIN" "$REAL_HOME/.local/bin/swww"
+        ln -sf "$ACTIVE_BIN" "$REAL_HOME/.local/bin/awww"
+        if sudo -n true 2>/dev/null; then
+            sudo ln -sf "$ACTIVE_BIN" /usr/local/bin/swww 2>/dev/null || true
+            sudo ln -sf "$ACTIVE_BIN" /usr/local/bin/awww 2>/dev/null || true
         fi
-    done
+        echo -e "$OK Enlaces swww/awww listos -> $ACTIVE_BIN"
+    fi
+
+    if [ -n "$ACTIVE_DAEMON" ] && [ -x "$ACTIVE_DAEMON" ]; then
+        rm -f "$REAL_HOME/.local/bin/swww-daemon" "$REAL_HOME/.local/bin/awww-daemon"
+        ln -sf "$ACTIVE_DAEMON" "$REAL_HOME/.local/bin/swww-daemon"
+        ln -sf "$ACTIVE_DAEMON" "$REAL_HOME/.local/bin/awww-daemon"
+        if sudo -n true 2>/dev/null; then
+            sudo ln -sf "$ACTIVE_DAEMON" /usr/local/bin/swww-daemon 2>/dev/null || true
+            sudo ln -sf "$ACTIVE_DAEMON" /usr/local/bin/awww-daemon 2>/dev/null || true
+        fi
+    fi
 
     # Enlaces de brillo y volumen
     if [ -f "$REAL_HOME/.config/bin/brillo.py" ]; then

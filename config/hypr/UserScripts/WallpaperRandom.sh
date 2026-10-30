@@ -27,7 +27,7 @@ if ! swww query >/dev/null 2>&1; then
     sleep 0.5
 fi
 
-swww img -o "$focused_monitor" "$RANDOMPICS" $SWWW_PARAMS
+swww img -o "$focused_monitor" "$RANDOMPICS" $SWWW_PARAMS 2>/dev/null || swww img "$RANDOMPICS" $SWWW_PARAMS
 
 "$SCRIPTSDIR/WallustSwww.sh" "$RANDOMPICS"
 sleep 2
